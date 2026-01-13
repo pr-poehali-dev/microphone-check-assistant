@@ -3,11 +3,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
 
 const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '💎', '⭐', '🎁'];
 const INITIAL_BALANCE = 1000;
 const JACKPOT_SYMBOL = '🎁';
+
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  requirement: number;
+  reward: number;
+  unlocked: boolean;
+}
+
+const ACHIEVEMENTS: Achievement[] = [
+  { id: 'spins_10', title: 'Новичок', description: 'Сделать 10 спинов', icon: '🎰', requirement: 10, reward: 100, unlocked: false },
+  { id: 'spins_50', title: 'Игрок', description: 'Сделать 50 спинов', icon: '🎲', requirement: 50, reward: 500, unlocked: false },
+  { id: 'spins_100', title: 'Профи', description: 'Сделать 100 спинов', icon: '🎯', requirement: 100, reward: 1000, unlocked: false },
+  { id: 'win_1000', title: 'Везунчик', description: 'Выиграть 1000 монет', icon: '🍀', requirement: 1000, reward: 500, unlocked: false },
+  { id: 'win_5000', title: 'Богач', description: 'Выиграть 5000 монет', icon: '💰', requirement: 5000, reward: 2000, unlocked: false },
+  { id: 'streak_5', title: 'Горячая серия', description: '5 побед подряд', icon: '🔥', requirement: 5, reward: 300, unlocked: false },
+  { id: 'streak_10', title: 'Непобедимый', description: '10 побед подряд', icon: '⚡', requirement: 10, reward: 1000, unlocked: false },
+  { id: 'jackpot_1', title: 'Счастливчик', description: 'Выиграть джекпот', icon: '🎁', requirement: 1, reward: 5000, unlocked: false },
+  { id: 'balance_5000', title: 'Миллионер', description: 'Накопить 5000 монет', icon: '💎', requirement: 5000, reward: 1000, unlocked: false },
+  { id: 'bonus_10', title: 'Бонус Мастер', description: 'Собрать 10 бонусных спинов', icon: '🎯', requirement: 10, reward: 500, unlocked: false },
+];
 
 const SecretCasino = () => {
   const [balance, setBalance] = useState(INITIAL_BALANCE);
@@ -21,7 +45,17 @@ const SecretCasino = () => {
   const [bonusRounds, setBonusRounds] = useState(0);
   const [inBonusMode, setInBonusMode] = useState(false);
   const [winStreak, setWinStreak] = useState(0);
+  const [maxWinStreak, setMaxWinStreak] = useState(0);
   const [showJackpotWin, setShowJackpotWin] = useState(false);
+  const [achievements, setAchievements] = useState<Achievement[]>(ACHIEVEMENTS);
+  const [showAchievement, setShowAchievement] = useState(false);
+  const [newAchievement, setNewAchievement] = useState<Achievement | null>(null);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [lastDailyReward, setLastDailyReward] = useState<string | null>(null);
+  const [showDailyReward, setShowDailyReward] = useState(false);
+  const [dailyStreak, setDailyStreak] = useState(0);
+  const [jackpotWins, setJackpotWins] = useState(0);
+  const [maxBonusCollected, setMaxBonusCollected] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem('casino-stats');
@@ -33,18 +67,106 @@ const SecretCasino = () => {
       setJackpot(stats.jackpot || 5000);
       setBonusRounds(stats.bonusRounds || 0);
       setWinStreak(stats.winStreak || 0);
+      setMaxWinStreak(stats.maxWinStreak || 0);
+      setLastDailyReward(stats.lastDailyReward || null);
+      setDailyStreak(stats.dailyStreak || 0);
+      setJackpotWins(stats.jackpotWins || 0);
+      setMaxBonusCollected(stats.maxBonusCollected || 0);
+      
+      if (stats.achievements) {
+        setAchievements(stats.achievements);
+      }
     }
+    checkDailyReward();
   }, []);
 
-  const saveStats = (newBalance: number, newSpins: number, newWins: number, newJackpot: number, newBonus: number, newStreak: number) => {
+  const checkDailyReward = () => {
+    const today = new Date().toDateString();
+    const lastReward = localStorage.getItem('last-daily-reward');
+    
+    if (lastReward !== today) {
+      setShowDailyReward(true);
+    }
+  };
+
+  const claimDailyReward = () => {
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    let newStreak = 1;
+    if (lastDailyReward === yesterday) {
+      newStreak = dailyStreak + 1;
+    }
+    
+    const reward = 100 + (newStreak - 1) * 50;
+    const newBalance = balance + reward;
+    
+    setBalance(newBalance);
+    setDailyStreak(newStreak);
+    setLastDailyReward(today);
+    setShowDailyReward(false);
+    
+    localStorage.setItem('last-daily-reward', today);
+    saveStats(newBalance, totalSpins, totalWins, jackpot, bonusRounds, winStreak, maxWinStreak, today, newStreak, jackpotWins, maxBonusCollected);
+  };
+
+  const saveStats = (
+    newBalance: number, 
+    newSpins: number, 
+    newWins: number, 
+    newJackpot: number, 
+    newBonus: number, 
+    newStreak: number,
+    newMaxStreak: number,
+    lastDaily: string | null,
+    newDailyStreak: number,
+    newJackpotWins: number,
+    newMaxBonus: number
+  ) => {
     localStorage.setItem('casino-stats', JSON.stringify({
       balance: newBalance,
       totalSpins: newSpins,
       totalWins: newWins,
       jackpot: newJackpot,
       bonusRounds: newBonus,
-      winStreak: newStreak
+      winStreak: newStreak,
+      maxWinStreak: newMaxStreak,
+      achievements: achievements,
+      lastDailyReward: lastDaily,
+      dailyStreak: newDailyStreak,
+      jackpotWins: newJackpotWins,
+      maxBonusCollected: newMaxBonus
     }));
+  };
+
+  const checkAchievements = (newBalance: number, newSpins: number, newWins: number, newStreak: number, newJackpotWins: number, currentBonus: number) => {
+    const updatedAchievements = achievements.map(ach => {
+      if (ach.unlocked) return ach;
+
+      let shouldUnlock = false;
+
+      if (ach.id === 'spins_10' && newSpins >= 10) shouldUnlock = true;
+      if (ach.id === 'spins_50' && newSpins >= 50) shouldUnlock = true;
+      if (ach.id === 'spins_100' && newSpins >= 100) shouldUnlock = true;
+      if (ach.id === 'win_1000' && newWins >= 1000) shouldUnlock = true;
+      if (ach.id === 'win_5000' && newWins >= 5000) shouldUnlock = true;
+      if (ach.id === 'streak_5' && newStreak >= 5) shouldUnlock = true;
+      if (ach.id === 'streak_10' && newStreak >= 10) shouldUnlock = true;
+      if (ach.id === 'jackpot_1' && newJackpotWins >= 1) shouldUnlock = true;
+      if (ach.id === 'balance_5000' && newBalance >= 5000) shouldUnlock = true;
+      if (ach.id === 'bonus_10' && currentBonus >= 10) shouldUnlock = true;
+
+      if (shouldUnlock) {
+        setNewAchievement(ach);
+        setShowAchievement(true);
+        setBalance(prev => prev + ach.reward);
+        return { ...ach, unlocked: true };
+      }
+
+      return ach;
+    });
+
+    setAchievements(updatedAchievements);
   };
 
   const spin = () => {
@@ -112,10 +234,18 @@ const SecretCasino = () => {
       const newWins = totalWins + winAmount;
       setTotalWins(newWins);
       setJackpot(5000);
-      setBonusRounds(bonusRounds + 10);
+      const newBonus = bonusRounds + 10;
+      setBonusRounds(newBonus);
       const newStreak = winStreak + 1;
       setWinStreak(newStreak);
-      saveStats(newBalance, newSpins, newWins, 5000, bonusRounds + 10, newStreak);
+      const newMaxStreak = Math.max(maxWinStreak, newStreak);
+      setMaxWinStreak(newMaxStreak);
+      const newJackpotWins = jackpotWins + 1;
+      setJackpotWins(newJackpotWins);
+      const newMaxBonus = Math.max(maxBonusCollected, newBonus);
+      setMaxBonusCollected(newMaxBonus);
+      saveStats(newBalance, newSpins, newWins, 5000, newBonus, newStreak, newMaxStreak, lastDailyReward, dailyStreak, newJackpotWins, newMaxBonus);
+      checkAchievements(newBalance, newSpins, newWins, newStreak, newJackpotWins, newBonus);
       return;
     }
 
@@ -145,13 +275,19 @@ const SecretCasino = () => {
       const newWins = totalWins + winAmount;
       setTotalWins(newWins);
       
+      const newBonus = bonusRounds + bonusSpins;
       if (bonusSpins > 0) {
-        setBonusRounds(bonusRounds + bonusSpins);
+        setBonusRounds(newBonus);
       }
       
       const newStreak = winStreak + 1;
       setWinStreak(newStreak);
-      saveStats(newBalance, newSpins, newWins, jackpot, bonusRounds + bonusSpins, newStreak);
+      const newMaxStreak = Math.max(maxWinStreak, newStreak);
+      setMaxWinStreak(newMaxStreak);
+      const newMaxBonus = Math.max(maxBonusCollected, newBonus);
+      setMaxBonusCollected(newMaxBonus);
+      saveStats(newBalance, newSpins, newWins, jackpot, newBonus, newStreak, newMaxStreak, lastDailyReward, dailyStreak, jackpotWins, newMaxBonus);
+      checkAchievements(newBalance, newSpins, newWins, newStreak, jackpotWins, newBonus);
     } else if (finalSlots[0] === finalSlots[1] || finalSlots[1] === finalSlots[2] || finalSlots[0] === finalSlots[2]) {
       let multiplier = 2;
       if (inBonusMode) multiplier = 3;
@@ -164,10 +300,14 @@ const SecretCasino = () => {
       setTotalWins(newWins);
       const newStreak = winStreak + 1;
       setWinStreak(newStreak);
-      saveStats(newBalance, newSpins, newWins, jackpot, bonusRounds, newStreak);
+      const newMaxStreak = Math.max(maxWinStreak, newStreak);
+      setMaxWinStreak(newMaxStreak);
+      saveStats(newBalance, newSpins, newWins, jackpot, bonusRounds, newStreak, newMaxStreak, lastDailyReward, dailyStreak, jackpotWins, maxBonusCollected);
+      checkAchievements(newBalance, newSpins, newWins, newStreak, jackpotWins, bonusRounds);
     } else {
       setWinStreak(0);
-      saveStats(currentBalance, newSpins, totalWins, jackpot, bonusRounds, 0);
+      saveStats(currentBalance, newSpins, totalWins, jackpot, bonusRounds, 0, maxWinStreak, lastDailyReward, dailyStreak, jackpotWins, maxBonusCollected);
+      checkAchievements(currentBalance, newSpins, totalWins, 0, jackpotWins, bonusRounds);
     }
 
     if (inBonusMode) {
@@ -202,10 +342,15 @@ const SecretCasino = () => {
     setBonusRounds(0);
     setInBonusMode(false);
     setWinStreak(0);
+    setMaxWinStreak(0);
+    setJackpotWins(0);
+    setMaxBonusCollected(0);
+    setAchievements(ACHIEVEMENTS);
     localStorage.removeItem('casino-stats');
   };
 
   const winRate = totalSpins > 0 ? ((totalWins / (totalSpins * bet)) * 100).toFixed(1) : '0';
+  const unlockedCount = achievements.filter(a => a.unlocked).length;
 
   return (
     <div className="fixed inset-0 z-[100] bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 overflow-auto">
@@ -220,6 +365,24 @@ const SecretCasino = () => {
               <span className="text-2xl font-bold text-yellow-300">🎁 БОНУС РЕЖИМ! 🎁</span>
             </div>
           )}
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <Button
+            onClick={() => setShowAchievements(true)}
+            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          >
+            <Icon name="Award" className="mr-2" size={18} />
+            Достижения ({unlockedCount}/{achievements.length})
+          </Button>
+          <Button
+            onClick={() => setShowDailyReward(true)}
+            disabled={!showDailyReward && lastDailyReward === new Date().toDateString()}
+            className="flex-1 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700"
+          >
+            <Icon name="Gift" className="mr-2" size={18} />
+            Награда дня {dailyStreak > 0 && `(${dailyStreak})`}
+          </Button>
         </div>
 
         <div className="grid md:grid-cols-4 gap-4 mb-6">
@@ -440,8 +603,8 @@ const SecretCasino = () => {
                 <p className="text-white font-bold">{totalSpins}</p>
               </div>
               <div className="bg-orange-900/50 rounded p-2">
-                <p className="text-orange-300">Серия</p>
-                <p className="text-white font-bold">{winStreak}</p>
+                <p className="text-orange-300">Макс серия</p>
+                <p className="text-white font-bold">{maxWinStreak}</p>
               </div>
             </div>
 
@@ -470,6 +633,100 @@ const SecretCasino = () => {
           <p>Игра сохраняется автоматически | Играйте ответственно! 🎰</p>
         </div>
       </div>
+
+      <Dialog open={showAchievement} onOpenChange={setShowAchievement}>
+        <DialogContent className="bg-gradient-to-br from-yellow-400 to-orange-500 border-4 border-yellow-600">
+          <DialogHeader>
+            <DialogTitle className="text-center text-3xl font-bold text-purple-900">
+              🏆 Достижение разблокировано! 🏆
+            </DialogTitle>
+          </DialogHeader>
+          {newAchievement && (
+            <div className="text-center space-y-4 py-6">
+              <div className="text-8xl animate-bounce">{newAchievement.icon}</div>
+              <h3 className="text-2xl font-bold text-purple-900">{newAchievement.title}</h3>
+              <p className="text-lg text-purple-800">{newAchievement.description}</p>
+              <div className="bg-white/50 rounded-lg p-4">
+                <p className="text-xl font-bold text-green-700">Награда: +{newAchievement.reward} монет!</p>
+              </div>
+              <Button
+                onClick={() => setShowAchievement(false)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
+              >
+                Забрать награду!
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAchievements} onOpenChange={setShowAchievements}>
+        <DialogContent className="bg-gradient-to-br from-purple-900 to-pink-900 border-4 border-purple-600 max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-3xl font-bold text-yellow-300">
+              🏆 Достижения {unlockedCount}/{achievements.length}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-4">
+            {achievements.map(ach => (
+              <div
+                key={ach.id}
+                className={`p-4 rounded-lg border-2 ${
+                  ach.unlocked
+                    ? 'bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border-yellow-500'
+                    : 'bg-purple-900/30 border-purple-700'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`text-5xl ${ach.unlocked ? '' : 'opacity-30 grayscale'}`}>
+                    {ach.icon}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className={`font-bold text-lg ${ach.unlocked ? 'text-yellow-300' : 'text-purple-300'}`}>
+                      {ach.title}
+                    </h4>
+                    <p className="text-sm text-purple-200">{ach.description}</p>
+                    <p className="text-sm text-green-400 mt-1">Награда: +{ach.reward} монет</p>
+                  </div>
+                  {ach.unlocked && (
+                    <Icon name="CheckCircle2" className="text-green-400" size={32} />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDailyReward && lastDailyReward !== new Date().toDateString()} onOpenChange={setShowDailyReward}>
+        <DialogContent className="bg-gradient-to-br from-orange-400 to-yellow-500 border-4 border-orange-600">
+          <DialogHeader>
+            <DialogTitle className="text-center text-3xl font-bold text-purple-900">
+              🎁 Ежедневная награда! 🎁
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-center space-y-4 py-6">
+            <div className="text-8xl animate-bounce">🎁</div>
+            <h3 className="text-2xl font-bold text-purple-900">
+              День {dailyStreak + 1}
+            </h3>
+            <p className="text-lg text-purple-800">
+              Возвращайтесь каждый день для увеличения награды!
+            </p>
+            <div className="bg-white/50 rounded-lg p-4">
+              <p className="text-3xl font-bold text-green-700">
+                +{100 + dailyStreak * 50} монет!
+              </p>
+            </div>
+            <Button
+              onClick={claimDailyReward}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
+            >
+              Забрать награду!
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
