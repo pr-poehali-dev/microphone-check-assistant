@@ -438,7 +438,7 @@ const Index = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Icon name="Music" className="text-accent" size={20} />
-                        <h4 className="text-lg font-semibold">Оба канала</h4>
+                        <h4 className="text-lg font-semibold text-neutral-900">Оба канала</h4>
                       </div>
                       <p className="text-sm text-muted-foreground">Звук должен быть слышен в обоих наушниках</p>
                     </div>
@@ -482,7 +482,7 @@ const Index = () => {
                   <div className="flex gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <Icon name="Volume2" className="text-primary shrink-0" size={24} />
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-900">Проверьте громкость</h4>
+                      <h4 className="font-semibold mb-1 text-neutral-900">Проверьте громкость</h4>
                       <p className="text-sm text-muted-foreground">
                         Убедитесь, что микрофон не отключен и уровень громкости установлен на подходящее значение.
                       </p>
@@ -492,7 +492,7 @@ const Index = () => {
                   <div className="flex gap-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
                     <Icon name="Headphones" className="text-secondary shrink-0" size={24} />
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-900">Проверьте подключение</h4>
+                      <h4 className="font-semibold mb-1 text-neutral-900">Проверьте подключение</h4>
                       <p className="text-sm text-muted-foreground">
                         Если используете внешний микрофон, убедитесь, что он правильно подключен к компьютеру.
                       </p>
@@ -502,7 +502,7 @@ const Index = () => {
                   <div className="flex gap-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
                     <Icon name="RefreshCw" className="text-accent shrink-0" size={24} />
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-900">Перезапустите браузер</h4>
+                      <h4 className="font-semibold mb-1 text-neutral-900">Перезапустите браузер</h4>
                       <p className="text-sm text-muted-foreground">
                         Иногда простая перезагрузка браузера помогает решить проблемы с доступом к микрофону.
                       </p>
@@ -512,7 +512,7 @@ const Index = () => {
                   <div className="flex gap-4 p-4 bg-green-50 rounded-lg border border-green-200">
                     <Icon name="Shield" className="text-green-600 shrink-0" size={24} />
                     <div>
-                      <h4 className="font-semibold mb-1 text-gray-900">Проверьте разрешения</h4>
+                      <h4 className="font-semibold mb-1 text-neutral-900">Проверьте разрешения</h4>
                       <p className="text-sm text-muted-foreground">
                         Убедитесь, что сайту разрешён доступ к микрофону в настройках браузера.
                       </p>
