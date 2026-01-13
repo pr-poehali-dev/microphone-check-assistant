@@ -57,6 +57,43 @@ const SecretCasino = () => {
   const [jackpotWins, setJackpotWins] = useState(0);
   const [maxBonusCollected, setMaxBonusCollected] = useState(0);
 
+  const playHoverSound = () => {
+    const audioContext = new AudioContext();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  };
+
+  const playClickSound = () => {
+    const audioContext = new AudioContext();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.1);
+    oscillator.type = 'square';
+    
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.15);
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem('casino-stats');
     if (saved) {
@@ -369,14 +406,16 @@ const SecretCasino = () => {
 
         <div className="flex gap-2 mb-4">
           <Button
-            onClick={() => setShowAchievements(true)}
+            onClick={() => { playClickSound(); setShowAchievements(true); }}
+            onMouseEnter={playHoverSound}
             className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
           >
             <Icon name="Award" className="mr-2" size={18} />
             Достижения ({unlockedCount}/{achievements.length})
           </Button>
           <Button
-            onClick={() => setShowDailyReward(true)}
+            onClick={() => { playClickSound(); setShowDailyReward(true); }}
+            onMouseEnter={playHoverSound}
             disabled={!showDailyReward && lastDailyReward === new Date().toDateString()}
             className="flex-1 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700"
           >
@@ -485,7 +524,8 @@ const SecretCasino = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-4">
                   <Button
-                    onClick={() => changeBet(-10)}
+                    onClick={() => { playClickSound(); changeBet(-10); }}
+                    onMouseEnter={playHoverSound}
                     disabled={bet <= 10 || spinning || inBonusMode}
                     size="lg"
                     variant="outline"
@@ -504,7 +544,8 @@ const SecretCasino = () => {
                   </div>
 
                   <Button
-                    onClick={() => changeBet(10)}
+                    onClick={() => { playClickSound(); changeBet(10); }}
+                    onMouseEnter={playHoverSound}
                     disabled={bet >= balance || bet >= 500 || spinning || inBonusMode}
                     size="lg"
                     variant="outline"
@@ -516,23 +557,27 @@ const SecretCasino = () => {
 
                 {!inBonusMode && (
                   <div className="grid grid-cols-4 gap-2">
-                    <Button onClick={() => setBet(10)} disabled={spinning} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={() => { playClickSound(); setBet(10); }} onMouseEnter={playHoverSound} disabled={spinning} className="bg-blue-600 hover:bg-blue-700">
                       10
                     </Button>
-                    <Button onClick={() => setBet(50)} disabled={balance < 50 || spinning} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={() => { playClickSound(); setBet(50); }} onMouseEnter={playHoverSound} disabled={balance < 50 || spinning} className="bg-blue-600 hover:bg-blue-700">
                       50
                     </Button>
-                    <Button onClick={() => setBet(100)} disabled={balance < 100 || spinning} className="bg-blue-600 hover:bg-blue-700">
+                    <Button onClick={() => { playClickSound(); setBet(100); }} onMouseEnter={playHoverSound} disabled={balance < 100 || spinning} className="bg-blue-600 hover:bg-blue-700">
                       100
                     </Button>
-                    <Button onClick={() => setBet(Math.min(balance, 500))} disabled={balance < 50 || spinning} className="bg-red-600 hover:bg-red-700">
+                    <Button onClick={() => { playClickSound(); setBet(Math.min(balance, 500)); }} onMouseEnter={playHoverSound} disabled={balance < 50 || spinning} className="bg-red-600 hover:bg-red-700">
                       MAX
                     </Button>
                   </div>
                 )}
 
                 <Button
-                  onClick={spin}
+                  onClick={() => {
+                    playClickSound();
+                    spin();
+                  }}
+                  onMouseEnter={playHoverSound}
                   disabled={balance < bet || spinning || (!inBonusMode && balance < bet)}
                   size="lg"
                   className={`w-full ${
@@ -556,7 +601,8 @@ const SecretCasino = () => {
 
                 {bonusRounds > 0 && !inBonusMode && (
                   <Button
-                    onClick={activateBonusMode}
+                    onClick={() => { playClickSound(); activateBonusMode(); }}
+                    onMouseEnter={playHoverSound}
                     size="lg"
                     className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold text-lg py-4 animate-pulse"
                   >
@@ -610,7 +656,8 @@ const SecretCasino = () => {
 
             <div className="flex gap-2">
               <Button
-                onClick={resetGame}
+                onClick={() => { playClickSound(); resetGame(); }}
+                onMouseEnter={playHoverSound}
                 variant="outline"
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-400"
               >
@@ -618,7 +665,8 @@ const SecretCasino = () => {
                 Сброс
               </Button>
               <Button
-                onClick={() => window.location.reload()}
+                onClick={() => { playClickSound(); window.location.reload(); }}
+                onMouseEnter={playHoverSound}
                 variant="outline"
                 className="flex-1 bg-purple-600 hover:bg-purple-700 text-white border-purple-400"
               >
@@ -650,7 +698,8 @@ const SecretCasino = () => {
                 <p className="text-xl font-bold text-green-700">Награда: +{newAchievement.reward} монет!</p>
               </div>
               <Button
-                onClick={() => setShowAchievement(false)}
+                onClick={() => { playClickSound(); setShowAchievement(false); }}
+                onMouseEnter={playHoverSound}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
               >
                 Забрать награду!
@@ -719,7 +768,8 @@ const SecretCasino = () => {
               </p>
             </div>
             <Button
-              onClick={claimDailyReward}
+              onClick={() => { playClickSound(); claimDailyReward(); }}
+              onMouseEnter={playHoverSound}
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg"
             >
               Забрать награду!
