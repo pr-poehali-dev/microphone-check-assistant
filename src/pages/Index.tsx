@@ -6,6 +6,7 @@ import DeviceInfoCard from '@/components/DeviceInfoCard';
 import MicrophoneTest from '@/components/MicrophoneTest';
 import HeadphoneTest from '@/components/HeadphoneTest';
 import SettingsTabs from '@/components/SettingsTabs';
+import SecretCasino from '@/components/SecretCasino';
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'error' | 'permission-denied';
 
@@ -21,6 +22,8 @@ const Index = () => {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>({ browser: '', os: '', device: '' });
   const [microphoneName, setMicrophoneName] = useState('');
   const [headphoneTestPlaying, setHeadphoneTestPlaying] = useState<'none' | 'left' | 'right' | 'both'>('none');
+  const [showCasino, setShowCasino] = useState(false);
+  const [clickSequence, setClickSequence] = useState<number[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -35,6 +38,21 @@ const Index = () => {
       stopTest();
     };
   }, []);
+
+  useEffect(() => {
+    if (clickSequence.length === 5 && 
+        clickSequence[0] === 0 && 
+        clickSequence[1] === 1 && 
+        clickSequence[2] === 2 && 
+        clickSequence[3] === 1 && 
+        clickSequence[4] === 0) {
+      setShowCasino(true);
+      setClickSequence([]);
+    }
+    if (clickSequence.length > 5) {
+      setClickSequence([]);
+    }
+  }, [clickSequence]);
 
   const detectDevice = () => {
     const userAgent = navigator.userAgent;
@@ -173,18 +191,31 @@ const Index = () => {
     setHeadphoneTestPlaying('none');
   };
 
+  if (showCasino) {
+    return <SecretCasino />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-orange-50 dark:from-background dark:via-background dark:to-background">
       <ThemeSwitcher />
       <div className="container max-w-5xl mx-auto px-4 py-12">
         <div className="text-center mb-12 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-6 shadow-lg">
+          <div 
+            className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-6 shadow-lg cursor-pointer"
+            onClick={() => setClickSequence([...clickSequence, 0])}
+          >
             <Icon name="Mic" className="text-white" size={40} />
           </div>
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          <h1 
+            className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent cursor-pointer select-none"
+            onClick={() => setClickSequence([...clickSequence, 1])}
+          >
             Проверка микрофона
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p 
+            className="text-xl text-muted-foreground max-w-2xl mx-auto cursor-pointer select-none"
+            onClick={() => setClickSequence([...clickSequence, 2])}
+          >
             Быстрая диагностика и настройка вашего микрофона онлайн
           </p>
         </div>
