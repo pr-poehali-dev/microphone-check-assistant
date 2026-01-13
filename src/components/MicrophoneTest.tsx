@@ -164,19 +164,18 @@ const MicrophoneTest = ({
               )}
             </div>
             
-            {testStatus === 'testing' && (
-              <div className="flex justify-center animate-fade-in">
-                <Button 
-                  onClick={onToggleMonitor}
-                  variant={monitorEnabled ? 'default' : 'outline'}
-                  size="sm"
-                  className="px-6"
-                >
-                  <Icon name={monitorEnabled ? 'Volume2' : 'VolumeX'} className="mr-2" size={18} />
-                  {monitorEnabled ? 'Прослушивание включено' : 'Слышать себя'}
-                </Button>
-              </div>
-            )}
+            <div className="flex justify-center">
+              <Button 
+                onClick={onToggleMonitor}
+                variant={monitorEnabled ? 'default' : 'outline'}
+                size="sm"
+                className="px-6"
+                disabled={testStatus !== 'testing'}
+              >
+                <Icon name={monitorEnabled ? 'Volume2' : 'VolumeX'} className="mr-2" size={18} />
+                {monitorEnabled ? 'Прослушивание включено' : 'Слышать себя'}
+              </Button>
+            </div>
           </div>
         </div>
 
