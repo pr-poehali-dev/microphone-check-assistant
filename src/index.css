@@ -93,6 +93,10 @@
 @layer base {
   * {
     @apply border-border;
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
   }
 
   body {
@@ -107,5 +111,11 @@
   h5,
   h6 {
     font-family: "Rubik", sans-serif;
+  }
+
+  :root {
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
 }

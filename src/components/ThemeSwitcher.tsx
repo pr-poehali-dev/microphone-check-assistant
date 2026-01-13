@@ -20,6 +20,8 @@ const ThemeSwitcher = () => {
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
     
+    root.style.transition = 'background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    
     if (newTheme === 'dark') {
       root.classList.add('dark');
       root.style.setProperty('--background', '222 47% 11%');
@@ -28,6 +30,10 @@ const ThemeSwitcher = () => {
       root.style.setProperty('--card-foreground', '210 40% 98%');
       root.style.setProperty('--primary', '199 89% 48%');
       root.style.setProperty('--primary-foreground', '0 0% 100%');
+      root.style.setProperty('--secondary', '142 76% 58%');
+      root.style.setProperty('--secondary-foreground', '0 0% 100%');
+      root.style.setProperty('--accent', '25 95% 53%');
+      root.style.setProperty('--accent-foreground', '0 0% 100%');
       root.style.setProperty('--muted', '217 33% 17%');
       root.style.setProperty('--muted-foreground', '215 20% 65%');
       root.style.setProperty('--border', '217 33% 25%');
