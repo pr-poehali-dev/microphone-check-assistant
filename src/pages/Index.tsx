@@ -20,10 +20,14 @@ const Index = () => {
   const [audioLevel, setAudioLevel] = useState(0);
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>({ browser: '', os: '', device: '' });
   const [microphoneName, setMicrophoneName] = useState('');
+  const [headphoneTestPlaying, setHeadphoneTestPlaying] = useState<'none' | 'left' | 'right' | 'both'>('none');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const oscillatorRef = useRef<OscillatorNode | null>(null);
+  const pannerRef = useRef<StereoPannerNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
 
   useEffect(() => {
     detectDevice();
@@ -161,6 +165,55 @@ const Index = () => {
       default:
         return 'Готов к проверке';
     }
+  };
+
+  const playHeadphoneTest = (channel: 'left' | 'right' | 'both') => {
+    stopHeadphoneTest();
+    
+    const audioContext = new AudioContext();
+    const oscillator = audioContext.createOscillator();
+    const panner = audioContext.createStereoPanner();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+    
+    if (channel === 'left') {
+      panner.pan.setValueAtTime(-1, audioContext.currentTime);
+    } else if (channel === 'right') {
+      panner.pan.setValueAtTime(1, audioContext.currentTime);
+    } else {
+      panner.pan.setValueAtTime(0, audioContext.currentTime);
+    }
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    
+    oscillator.connect(panner);
+    panner.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start();
+    
+    oscillatorRef.current = oscillator;
+    pannerRef.current = panner;
+    gainNodeRef.current = gainNode;
+    audioContextRef.current = audioContext;
+    
+    setHeadphoneTestPlaying(channel);
+  };
+
+  const stopHeadphoneTest = () => {
+    if (oscillatorRef.current) {
+      oscillatorRef.current.stop();
+      oscillatorRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    pannerRef.current = null;
+    gainNodeRef.current = null;
+    setHeadphoneTestPlaying('none');
   };
 
   return (
@@ -306,8 +359,12 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="tips" className="mb-8">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="headphones" className="mb-8">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="headphones" className="text-base">
+              <Icon name="Headphones" className="mr-2" size={18} />
+              Наушники
+            </TabsTrigger>
             <TabsTrigger value="tips" className="text-base">
               <Icon name="Lightbulb" className="mr-2" size={18} />
               Советы
@@ -317,6 +374,98 @@ const Index = () => {
               Настройка по ОС
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="headphones" className="mt-6">
+            <Card className="border-2 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon name="Headphones" className="text-secondary" size={24} />
+                  Тестирование наушников
+                </CardTitle>
+                <CardDescription>
+                  Проверьте, правильно ли работают левый и правый каналы
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Alert className="border-blue-200 bg-blue-50">
+                  <Icon name="Info" className="text-blue-600" size={20} />
+                  <AlertTitle className="text-blue-900">Как пользоваться</AlertTitle>
+                  <AlertDescription className="text-blue-800">
+                    Наденьте наушники и нажмите на кнопки ниже. Вы должны услышать звук в соответствующем канале.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="grid gap-4">
+                  <div className="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon name="ArrowLeft" className="text-primary" size={20} />
+                        <h4 className="text-lg font-semibold">Левый канал</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Звук должен быть слышен в левом наушнике</p>
+                    </div>
+                    <Button
+                      size="lg"
+                      onClick={() => headphoneTestPlaying === 'left' ? stopHeadphoneTest() : playHeadphoneTest('left')}
+                      className={headphoneTestPlaying === 'left' ? 'bg-red-600 hover:bg-red-700' : ''}
+                    >
+                      <Icon name={headphoneTestPlaying === 'left' ? 'Square' : 'Volume2'} className="mr-2" size={20} />
+                      {headphoneTestPlaying === 'left' ? 'Стоп' : 'Тест'}
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-6 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border-2 border-purple-200">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon name="ArrowRight" className="text-secondary" size={20} />
+                        <h4 className="text-lg font-semibold">Правый канал</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Звук должен быть слышен в правом наушнике</p>
+                    </div>
+                    <Button
+                      size="lg"
+                      onClick={() => headphoneTestPlaying === 'right' ? stopHeadphoneTest() : playHeadphoneTest('right')}
+                      className={headphoneTestPlaying === 'right' ? 'bg-red-600 hover:bg-red-700' : ''}
+                    >
+                      <Icon name={headphoneTestPlaying === 'right' ? 'Square' : 'Volume2'} className="mr-2" size={20} />
+                      {headphoneTestPlaying === 'right' ? 'Стоп' : 'Тест'}
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon name="Music" className="text-accent" size={20} />
+                        <h4 className="text-lg font-semibold">Оба канала</h4>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Звук должен быть слышен в обоих наушниках</p>
+                    </div>
+                    <Button
+                      size="lg"
+                      onClick={() => headphoneTestPlaying === 'both' ? stopHeadphoneTest() : playHeadphoneTest('both')}
+                      className={headphoneTestPlaying === 'both' ? 'bg-red-600 hover:bg-red-700' : ''}
+                    >
+                      <Icon name={headphoneTestPlaying === 'both' ? 'Square' : 'Volume2'} className="mr-2" size={20} />
+                      {headphoneTestPlaying === 'both' ? 'Стоп' : 'Тест'}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-4 border-t">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Icon name="HelpCircle" className="text-primary" size={20} />
+                    Что делать, если звук не слышен?
+                  </h4>
+                  <ul className="space-y-2 ml-6 list-disc text-sm text-muted-foreground">
+                    <li>Убедитесь, что наушники правильно подключены к компьютеру</li>
+                    <li>Проверьте уровень громкости в системе и на самих наушниках</li>
+                    <li>Попробуйте другое аудио-устройство для вывода</li>
+                    <li>Перезапустите браузер и разрешите воспроизведение звука</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="tips" className="mt-6">
             <Card className="border-2 shadow-lg">
