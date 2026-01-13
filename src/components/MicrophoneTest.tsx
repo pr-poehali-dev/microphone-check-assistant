@@ -68,6 +68,24 @@ const MicrophoneTest = ({
     }
   };
 
+  const getVolumeStatus = () => {
+    if (testStatus !== 'testing') return null;
+    
+    if (audioLevel === 0) {
+      return { text: 'Нет звука', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
+    } else if (audioLevel < 20) {
+      return { text: 'Очень слабо', color: 'text-orange-600', bgColor: 'bg-orange-50', borderColor: 'border-orange-200' };
+    } else if (audioLevel < 40) {
+      return { text: 'Слабо', color: 'text-yellow-600', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200' };
+    } else if (audioLevel < 70) {
+      return { text: 'Хорошо', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
+    } else {
+      return { text: 'Отлично', color: 'text-green-700', bgColor: 'bg-green-100', borderColor: 'border-green-300' };
+    }
+  };
+
+  const volumeStatus = getVolumeStatus();
+
   return (
     <Card className="mb-8 border-2 shadow-xl animate-scale-in">
       <CardHeader>
@@ -107,12 +125,27 @@ const MicrophoneTest = ({
           </p>
 
           {testStatus === 'testing' && (
-            <div className="space-y-2 animate-fade-in">
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Уровень сигнала</span>
-                <span>{Math.round(audioLevel)}%</span>
+            <div className="space-y-4 animate-fade-in">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Уровень сигнала</span>
+                  <span className="font-semibold">{Math.round(audioLevel)}%</span>
+                </div>
+                <Progress value={audioLevel} className="h-4" />
               </div>
-              <Progress value={audioLevel} className="h-3" />
+              
+              {volumeStatus && (
+                <div className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 ${volumeStatus.bgColor} ${volumeStatus.borderColor}`}>
+                  <Icon 
+                    name={audioLevel === 0 ? 'MicOff' : audioLevel < 40 ? 'Volume1' : 'Volume2'} 
+                    className={volumeStatus.color} 
+                    size={20} 
+                  />
+                  <span className={`font-bold ${volumeStatus.color}`}>
+                    {volumeStatus.text}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -167,15 +200,7 @@ const MicrophoneTest = ({
           </Alert>
         )}
 
-        {testStatus === 'success' && audioLevel < 5 && (
-          <Alert className="border-yellow-200 bg-yellow-50">
-            <Icon name="AlertTriangle" className="text-yellow-600" size={20} />
-            <AlertTitle className="text-yellow-900">Низкий уровень сигнала</AlertTitle>
-            <AlertDescription className="text-yellow-800">
-              Микрофон работает, но сигнал очень тихий. Попробуйте говорить громче или увеличьте чувствительность микрофона в настройках.
-            </AlertDescription>
-          </Alert>
-        )}
+
       </CardContent>
     </Card>
   );
