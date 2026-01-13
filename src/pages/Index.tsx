@@ -24,6 +24,7 @@ const Index = () => {
   const [headphoneTestPlaying, setHeadphoneTestPlaying] = useState<'none' | 'left' | 'right' | 'both'>('none');
   const [showCasino, setShowCasino] = useState(false);
   const [clickSequence, setClickSequence] = useState<number[]>([]);
+  const [monitorEnabled, setMonitorEnabled] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -31,6 +32,7 @@ const Index = () => {
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const pannerRef = useRef<StereoPannerNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
+  const monitorGainRef = useRef<GainNode | null>(null);
 
   useEffect(() => {
     detectDevice();
@@ -99,6 +101,12 @@ const Index = () => {
       const source = audioContext.createMediaStreamSource(stream);
       source.connect(analyser);
 
+      const monitorGain = audioContext.createGain();
+      monitorGain.gain.setValueAtTime(0, audioContext.currentTime);
+      monitorGainRef.current = monitorGain;
+      source.connect(monitorGain);
+      monitorGain.connect(audioContext.destination);
+
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
       const updateLevel = () => {
@@ -138,8 +146,23 @@ const Index = () => {
     if (audioContextRef.current) {
       audioContextRef.current.close();
     }
+    monitorGainRef.current = null;
     setAudioLevel(0);
     setTestStatus('idle');
+    setMonitorEnabled(false);
+  };
+
+  const toggleMonitor = () => {
+    if (!monitorGainRef.current) return;
+    
+    const newState = !monitorEnabled;
+    setMonitorEnabled(newState);
+    
+    if (newState) {
+      monitorGainRef.current.gain.setValueAtTime(1, audioContextRef.current!.currentTime);
+    } else {
+      monitorGainRef.current.gain.setValueAtTime(0, audioContextRef.current!.currentTime);
+    }
   };
 
   const playHeadphoneTest = (channel: 'left' | 'right' | 'both') => {
@@ -243,8 +266,10 @@ const Index = () => {
               testStatus={testStatus}
               audioLevel={audioLevel}
               microphoneName={microphoneName}
+              monitorEnabled={monitorEnabled}
               onStartTest={startTest}
               onStopTest={stopTest}
+              onToggleMonitor={toggleMonitor}
             />
           </TabsContent>
 

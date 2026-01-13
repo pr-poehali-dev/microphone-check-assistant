@@ -10,16 +10,20 @@ interface MicrophoneTestProps {
   testStatus: TestStatus;
   audioLevel: number;
   microphoneName: string;
+  monitorEnabled: boolean;
   onStartTest: () => void;
   onStopTest: () => void;
+  onToggleMonitor: () => void;
 }
 
 const MicrophoneTest = ({ 
   testStatus, 
   audioLevel, 
   microphoneName, 
+  monitorEnabled,
   onStartTest, 
-  onStopTest 
+  onStopTest,
+  onToggleMonitor
 }: MicrophoneTestProps) => {
   const getStatusColor = () => {
     switch (testStatus) {
@@ -112,17 +116,33 @@ const MicrophoneTest = ({
             </div>
           )}
 
-          <div className="mt-8">
-            {testStatus === 'idle' || testStatus === 'error' || testStatus === 'permission-denied' ? (
-              <Button onClick={onStartTest} size="lg" className="px-8">
-                <Icon name="Play" className="mr-2" size={20} />
-                Начать проверку
-              </Button>
-            ) : (
-              <Button onClick={onStopTest} variant="outline" size="lg" className="px-8">
-                <Icon name="StopCircle" className="mr-2" size={20} />
-                Остановить
-              </Button>
+          <div className="mt-8 space-y-3">
+            <div className="flex gap-3 justify-center">
+              {testStatus === 'idle' || testStatus === 'error' || testStatus === 'permission-denied' ? (
+                <Button onClick={onStartTest} size="lg" className="px-8">
+                  <Icon name="Play" className="mr-2" size={20} />
+                  Начать проверку
+                </Button>
+              ) : (
+                <Button onClick={onStopTest} variant="outline" size="lg" className="px-8">
+                  <Icon name="StopCircle" className="mr-2" size={20} />
+                  Остановить
+                </Button>
+              )}
+            </div>
+            
+            {testStatus === 'testing' && (
+              <div className="flex justify-center animate-fade-in">
+                <Button 
+                  onClick={onToggleMonitor}
+                  variant={monitorEnabled ? 'default' : 'outline'}
+                  size="sm"
+                  className="px-6"
+                >
+                  <Icon name={monitorEnabled ? 'Volume2' : 'VolumeX'} className="mr-2" size={18} />
+                  {monitorEnabled ? 'Прослушивание включено' : 'Слышать себя'}
+                </Button>
+              </div>
             )}
           </div>
         </div>
