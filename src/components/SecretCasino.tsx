@@ -98,6 +98,30 @@ const SecretCasino = ({ onExit }: SecretCasinoProps) => {
     oscillator.stop(audioContext.currentTime + 0.15);
   };
 
+  const playSpinSound = () => {
+    const audioContext = new AudioContext();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+    
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2000, audioContext.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 1.5);
+    
+    oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+    oscillator.type = 'sawtooth';
+    
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 1.5);
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem('casino-stats');
     if (saved) {
@@ -216,6 +240,7 @@ const SecretCasino = ({ onExit }: SecretCasinoProps) => {
     }
 
     playClickSound();
+    playSpinSound();
     setSpinning(true);
     setLastWin(0);
 
