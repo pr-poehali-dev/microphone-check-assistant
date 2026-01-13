@@ -33,7 +33,11 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'bonus_10', title: 'Бонус Мастер', description: 'Собрать 10 бонусных спинов', icon: '🎯', requirement: 10, reward: 500, unlocked: false },
 ];
 
-const SecretCasino = () => {
+interface SecretCasinoProps {
+  onExit: () => void;
+}
+
+const SecretCasino = ({ onExit }: SecretCasinoProps) => {
   const [balance, setBalance] = useState(INITIAL_BALANCE);
   const [bet, setBet] = useState(10);
   const [slots, setSlots] = useState(['🍒', '🍋', '🍊']);
@@ -336,11 +340,21 @@ const SecretCasino = () => {
       <div className="max-w-6xl mx-auto">
         <Card className="mb-6 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white border-0">
           <CardHeader>
-            <CardTitle className="text-4xl text-center font-black flex items-center justify-center gap-3">
-              <Icon name="Sparkles" size={40} />
-              🎰 СЕКРЕТНОЕ КАЗИНО 🎰
-              <Icon name="Sparkles" size={40} />
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={onExit}
+                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all flex items-center gap-2"
+              >
+                <Icon name="ArrowLeft" size={20} />
+                Выход
+              </button>
+              <CardTitle className="text-4xl font-black flex items-center gap-3">
+                <Icon name="Sparkles" size={40} />
+                🎰 СЕКРЕТНОЕ КАЗИНО 🎰
+                <Icon name="Sparkles" size={40} />
+              </CardTitle>
+              <div className="w-24"></div>
+            </div>
           </CardHeader>
         </Card>
 

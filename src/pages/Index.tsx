@@ -207,7 +207,7 @@ const Index = () => {
   };
 
   if (showCasino) {
-    return <SecretCasino />;
+    return <SecretCasino onExit={() => setShowCasino(false)} />;
   }
 
   return (
