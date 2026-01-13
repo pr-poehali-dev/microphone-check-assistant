@@ -170,7 +170,6 @@ const MicrophoneTest = ({
                 variant={monitorEnabled ? 'default' : 'outline'}
                 size="sm"
                 className="px-6"
-                disabled={testStatus !== 'testing'}
               >
                 <Icon name={monitorEnabled ? 'Volume2' : 'VolumeX'} className="mr-2" size={18} />
                 {monitorEnabled ? 'Прослушивание включено' : 'Слышать себя'}
@@ -201,6 +200,20 @@ const MicrophoneTest = ({
 
 
       </CardContent>
+      <div className="px-6 py-4 border-t border-border">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Icon name="MessageCircle" size={16} />
+          <span>Нужна помощь?</span>
+          <a 
+            href="https://t.me/domestosiik" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium"
+          >
+            Служба поддержки
+          </a>
+        </div>
+      </div>
     </Card>
   );
 };

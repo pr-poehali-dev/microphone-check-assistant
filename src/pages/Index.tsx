@@ -246,8 +246,8 @@ const Index = () => {
               Наушники
             </TabsTrigger>
             <TabsTrigger value="settings" className="text-base">
-              <Icon name="Settings" className="mr-2" size={18} />
-              Настройки
+              <Icon name="Lightbulb" className="mr-2" size={18} />
+              Советы
             </TabsTrigger>
           </TabsList>
 
