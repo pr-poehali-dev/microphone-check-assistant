@@ -402,7 +402,7 @@ const Index = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Icon name="ArrowLeft" className="text-primary" size={20} />
-                        <h4 className="text-lg font-semibold">Левый канал</h4>
+                        <h4 className="text-lg font-semibold text-gray-900">Левый канал</h4>
                       </div>
                       <p className="text-sm text-muted-foreground">Звук должен быть слышен в левом наушнике</p>
                     </div>
@@ -420,7 +420,7 @@ const Index = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Icon name="ArrowRight" className="text-secondary" size={20} />
-                        <h4 className="text-lg font-semibold">Правый канал</h4>
+                        <h4 className="text-lg font-semibold text-gray-900">Правый канал</h4>
                       </div>
                       <p className="text-sm text-muted-foreground">Звук должен быть слышен в правом наушнике</p>
                     </div>
