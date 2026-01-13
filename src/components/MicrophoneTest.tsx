@@ -69,7 +69,9 @@ const MicrophoneTest = ({
   };
 
   const getVolumeStatus = () => {
-    if (testStatus !== 'testing') return null;
+    if (testStatus !== 'testing') {
+      return { text: 'Микрофон не активен', color: 'text-gray-600', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' };
+    }
     
     if (audioLevel === 0) {
       return { text: 'Нет звука', color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200' };
@@ -80,7 +82,7 @@ const MicrophoneTest = ({
     } else if (audioLevel < 70) {
       return { text: 'Хорошо', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200' };
     } else {
-      return { text: 'Отлично', color: 'text-green-700', bgColor: 'bg-green-100', borderColor: 'border-green-300' };
+      return { text: 'Микрофон работает отлично', color: 'text-green-700', bgColor: 'bg-green-100', borderColor: 'border-green-300' };
     }
   };
 
@@ -124,30 +126,28 @@ const MicrophoneTest = ({
             {testStatus === 'idle' && 'Нажмите кнопку для начала теста'}
           </p>
 
-          {testStatus === 'testing' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Уровень сигнала</span>
-                  <span className="font-semibold">{Math.round(audioLevel)}%</span>
-                </div>
-                <Progress value={audioLevel} className="h-4" />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Уровень сигнала</span>
+                <span className="font-semibold">{Math.round(audioLevel)}%</span>
               </div>
-              
-              {volumeStatus && (
-                <div className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 ${volumeStatus.bgColor} ${volumeStatus.borderColor}`}>
-                  <Icon 
-                    name={audioLevel === 0 ? 'MicOff' : audioLevel < 40 ? 'Volume1' : 'Volume2'} 
-                    className={volumeStatus.color} 
-                    size={20} 
-                  />
-                  <span className={`font-bold ${volumeStatus.color}`}>
-                    {volumeStatus.text}
-                  </span>
-                </div>
-              )}
+              <Progress value={audioLevel} className="h-4" />
             </div>
-          )}
+            
+            {volumeStatus && (
+              <div className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all duration-300 ${volumeStatus.bgColor} ${volumeStatus.borderColor}`}>
+                <Icon 
+                  name={testStatus !== 'testing' ? 'Mic' : audioLevel === 0 ? 'MicOff' : audioLevel < 40 ? 'Volume1' : 'Volume2'} 
+                  className={volumeStatus.color} 
+                  size={20} 
+                />
+                <span className={`font-bold ${volumeStatus.color}`}>
+                  {volumeStatus.text}
+                </span>
+              </div>
+            )}
+          </div>
 
           <div className="mt-8 space-y-3">
             <div className="flex gap-3 justify-center">
