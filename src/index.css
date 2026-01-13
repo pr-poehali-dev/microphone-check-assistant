@@ -118,4 +118,24 @@
       background-color 0.3s ease,
       color 0.3s ease;
   }
+
+  @keyframes slot-spin {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    25% {
+      transform: translateY(-100%);
+    }
+    50% {
+      transform: translateY(-200%);
+    }
+    75% {
+      transform: translateY(-300%);
+    }
+  }
+
+  .animate-slot-spin {
+    animation: slot-spin 0.1s linear infinite;
+  }
 }
