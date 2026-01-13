@@ -47,14 +47,14 @@ const playHoverSound = () => {
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
   
-  oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+  oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
   oscillator.type = 'sine';
   
-  gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+  gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
   
   oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + 0.1);
+  oscillator.stop(audioContext.currentTime + 0.05);
 };
 
 const playClickSound = () => {
@@ -65,15 +65,15 @@ const playClickSound = () => {
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
   
-  oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.1);
-  oscillator.type = 'square';
+  oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.08);
+  oscillator.type = 'sine';
   
-  gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+  gainNode.gain.setValueAtTime(0.04, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
   
   oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + 0.15);
+  oscillator.stop(audioContext.currentTime + 0.08);
 };
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
